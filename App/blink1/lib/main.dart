@@ -22,7 +22,6 @@ class _EyeStatusAppState extends State<EyeStatusApp> {
 
   final List<String> videoUrls = [
     "https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4",
-    "https://sample-videos.com/video123/mp4/480/big_buck_bunny.mp4",
     "https://media.w3.org/2010/05/sintel/trailer.mp4",
   ];
 
@@ -33,20 +32,20 @@ class _EyeStatusAppState extends State<EyeStatusApp> {
   void initState() {
     super.initState();
 
-    // Init video controllers
-    for (var i = 0; i < videoUrls.length; i++) {
-      final controller =
-          VideoPlayerController.networkUrl(Uri.parse(videoUrls[i]))
-            ..setLooping(true)
-            ..setVolume(0) // mute for autoplay on web
-            ..initialize().then((_) {
-              setState(() {});
-              if (i == 0) controlVideoPlayback(); // start first video if needed
-            });
+    for (int i = 0; i < videoUrls.length; i++) {
+      final controller = VideoPlayerController.network(videoUrls[i]);
+      controller
+        ..setLooping(true)
+        ..setVolume(0)
+        ..initialize().then((_) {
+          setState(() {});
+          if (i == 0 && eyeClosed == true) {
+            controller.play();
+          }
+        });
       controllers.add(controller);
     }
 
-    // Poll API
     fetchStatus();
     timer = Timer.periodic(const Duration(milliseconds: 500), (_) {
       fetchStatus();
@@ -67,14 +66,23 @@ class _EyeStatusAppState extends State<EyeStatusApp> {
       final res = await http.get(Uri.parse(serverUrl));
       if (res.statusCode == 200) {
         final data = jsonDecode(res.body);
+
+        bool? newStatus;
         if (data["status"] is bool) {
-          eyeClosed = data["status"];
+          newStatus = data["status"];
         } else {
           final statusString = data["status"].toString().toUpperCase().trim();
-          eyeClosed = statusString.contains("CLOSED");
+          newStatus = statusString.contains("CLOSED");
         }
-        setState(() {});
-        controlVideoPlayback();
+
+        if (newStatus != eyeClosed) {
+          setState(() {
+            eyeClosed = newStatus;
+          });
+          controlVideoPlayback();
+        }
+      } else {
+        debugPrint("API returned ${res.statusCode}: ${res.body}");
       }
     } catch (e) {
       debugPrint("Error fetching status: $e");
@@ -83,21 +91,18 @@ class _EyeStatusAppState extends State<EyeStatusApp> {
 
   void controlVideoPlayback() {
     if (eyeClosed == null) return;
-    final currentController = controllers[currentPage];
 
-    if (!currentController.value.isInitialized) {
-      // Wait until initialized before playing
-      currentController.initialize().then((_) {
-        if (eyeClosed!) currentController.play();
-        setState(() {});
-      });
-      return;
-    }
+    final currentController = controllers[currentPage];
+    if (!currentController.value.isInitialized) return;
 
     if (eyeClosed!) {
-      if (!currentController.value.isPlaying) currentController.play();
+      if (!currentController.value.isPlaying) {
+        currentController.play();
+      }
     } else {
-      if (currentController.value.isPlaying) currentController.pause();
+      if (currentController.value.isPlaying) {
+        currentController.pause();
+      }
     }
   }
 
@@ -139,19 +144,7 @@ class _EyeStatusAppState extends State<EyeStatusApp> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 10, vertical: 5),
                     decoration: BoxDecoration(
-                      color: Colors.black54,
                       borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Text(
-                      eyeClosed == null
-                          ? "Loading..."
-                          : eyeClosed!
-                              ? "Eyes Closed → Playing"
-                              : "Eyes Open → Paused",
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold),
                     ),
                   ),
                 ),
