@@ -44,7 +44,7 @@ Then i used a mini flask api to connect the backend server (my laptop,hence its 
 # Run
 - run blink.py to start the backend server(don't close)
 - change the ip address to the ip adress of your system
-- pen another vs code terminal
+- open another vs code terminal
 - cd App/blink1 
 - run the command :- flutter run lib/main.dart
 
