@@ -37,16 +37,16 @@ I first created a python script which detects whether your eyes are open or not(
 baisically it's a mathematical measurement which tells the program how open or close the eyes are and uses six different landmarks or features to map each eye so in theory you can cheat the program by opening your eyes just a teeny tiny bit.
 Then i used a mini flask api to connect the backend server (my laptop,hence its Ip address there and here,i don't know how safe this is but at this point i am too lazy to change it) to the flutter front end which has a simple video player and tetris game pages.
 # Installation
-Download from GitHub(then open Terminal)
-run :- pip install -r requirements.txt
-install flutter,android studio and a flutter emulator
+- Download from GitHub(then open Terminal)
+- run :- pip install -r requirements.txt
+- install flutter,android studio and a flutter emulator
 
 # Run
--run blink.py to start the backend server(don't close)
--change the ip address to the ip adress of your system
--pen another vs code terminal
--cd App/blink1 
--run the command :- flutter run lib/main.dart
+- run blink.py to start the backend server(don't close)
+- change the ip address to the ip adress of your system
+- pen another vs code terminal
+- cd App/blink1 
+- run the command :- flutter run lib/main.dart
 
 ### Project Documentation
 
