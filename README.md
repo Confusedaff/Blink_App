@@ -43,6 +43,7 @@ install flutter,android studio and a flutter emulator
 
 # Run
 run blink.py to start the backend server(don't close)
+also change the ip address to the ip adress of your system
 open another vs code terminal
 cd App/blink1 
 run the command :- flutter run lib/main.dart
